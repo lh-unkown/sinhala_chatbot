@@ -55,10 +55,10 @@ export async function POST(req) {
     }
 
     const modelNames = [
-      "gemini-2.5-flash",
-      "gemini-2.5-pro",
       "gemini-2.0-flash",
-      "gemini-flash-latest"
+      "gemini-2.5-flash",
+      "gemini-flash-latest",
+      "gemini-2.5-pro"
     ];
 
     let result = null;
