@@ -37,6 +37,18 @@ export async function POST(req) {
     }
     promptText += "Assistant: ";
 
+    const lastMessage = messages[messages.length - 1];
+    const generateParts = [promptText];
+    
+    if (lastMessage.attachment) {
+      generateParts.push({
+        inlineData: {
+          data: lastMessage.attachment.data,
+          mimeType: lastMessage.attachment.mimeType
+        }
+      });
+    }
+
     const modelNames = [
       "gemini-2.5-flash",
       "gemini-2.0-flash",
@@ -54,7 +66,7 @@ export async function POST(req) {
     for (const name of modelNames) {
       try {
         const model = genAI.getGenerativeModel({ model: name });
-        result = await model.generateContent(promptText);
+        result = await model.generateContent(generateParts);
         successfulModel = name;
         break; 
       } catch (e) {

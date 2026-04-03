@@ -356,3 +356,75 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
   backdrop-filter: blur(5px);
 }
+
+/* File Attachment UI */
+.filePreviewContainer {
+  position: absolute;
+  top: -46px;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
+  z-index: 10;
+}
+
+.filePreviewPill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(10, 20, 25, 0.9);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  border-radius: 20px;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(6, 182, 212, 0.1);
+  color: #cffafe;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+  max-width: 100%;
+}
+
+.fileName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.removeFileBtn {
+  background: none;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  transition: background 0.2s;
+}
+
+.removeFileBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.attachButton {
+  background: rgba(10, 20, 25, 0.7);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  color: #22d3ee;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.attachButton:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: #22d3ee;
+}

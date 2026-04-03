@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FaPaperPlane, FaUser } from "react-icons/fa";
+import { FaPaperPlane, FaUser, FaPaperclip, FaTimes } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import styles from "./page.module.css";
 
@@ -10,11 +10,37 @@ export default function ChatBot() {
     { role: "bot", content: "ආයුබෝවන්! මම ඔබේ සිංහල AI සහායකයා. මට ඔබට උදව් කළ හැකි දෙයක් තිබේද?" }
   ]);
   const [input, setInput] = useState("");
+  const [attachment, setAttachment] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 10MB Limit
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File is too large. Maximum size is 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result.split(',')[1];
+      setAttachment({
+        name: file.name,
+        mimeType: file.type,
+        data: base64String
+      });
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = null;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,13 +51,18 @@ export default function ChatBot() {
   }, [messages, isLoading]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !attachment) return;
     
     setError(null);
-    const userMessage = { role: "user", content: input.trim() };
+    const userMessage = { 
+        role: "user", 
+        content: input.trim() || "[File Attached]",
+        attachment: attachment
+    };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
+    setAttachment(null);
     setIsLoading(true);
 
     try {
@@ -120,6 +151,33 @@ export default function ChatBot() {
 
         {/* Input Area */}
         <div className={styles.inputArea}>
+          {attachment && (
+            <div className={styles.filePreviewContainer}>
+              <div className={styles.filePreviewPill}>
+                <span className={styles.fileName}>{attachment.name}</span>
+                <button className={styles.removeFileBtn} onClick={() => setAttachment(null)}>
+                  <FaTimes size={12} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          <input 
+            type="file" 
+            accept="image/png, image/jpeg, image/webp, application/pdf" 
+            style={{ display: "none" }} 
+            ref={fileInputRef}
+            onChange={handleFileChange} 
+          />
+          <button 
+            className={styles.attachButton}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            title="Attach File"
+          >
+            <FaPaperclip />
+          </button>
+
           <textarea
             ref={inputRef}
             className={styles.inputField}
@@ -133,7 +191,7 @@ export default function ChatBot() {
           <button 
             className={styles.sendButton} 
             onClick={handleSend} 
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && !attachment) || isLoading}
             title="Transmit"
           >
             <FaPaperPlane />
