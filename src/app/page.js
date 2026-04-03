@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FaPaperPlane, FaUser, FaPaperclip, FaTimes } from "react-icons/fa";
+import { FaPaperPlane, FaUser, FaPaperclip, FaTimes, FaFilePdf, FaFileWord, FaFileExcel, FaFileImage } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import styles from "./page.module.css";
 
 export default function ChatBot() {
@@ -41,6 +45,46 @@ export default function ChatBot() {
     reader.readAsDataURL(file);
     e.target.value = null;
   };
+
+  // --- Export Engines ---
+  const exportWord = (content) => {
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>";
+    const footer = "</body></html>";
+    const blob = new Blob(['\ufeff', header + content.replace(/\n/g, '<br/>') + footer], { type: 'application/msword' });
+    saveAs(blob, "chat_document.doc");
+  };
+
+  const exportPDF = async (msgId) => {
+    const element = document.getElementById(`msg-${msgId}`);
+    if (!element) return;
+    const canvas = await html2canvas(element, { scale: 2, backgroundColor: "#0f172a" });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save("chat_document.pdf");
+  };
+
+  const exportExcel = (content) => {
+    const lines = content.split('\n').filter(l => l.trim().startsWith('|'));
+    if (lines.length < 2) return;
+    const data = lines.filter(l => !l.includes('---')).map(l => l.split('|').map(cell => cell.trim()).filter(Boolean));
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "data_table.xlsx");
+  };
+
+  const exportPNG = async (msgId) => {
+    const element = document.getElementById(`msg-${msgId}`);
+    if (!element) return;
+    const canvas = await html2canvas(element, { scale: 2, backgroundColor: "#0f172a" });
+    canvas.toBlob((blob) => {
+      saveAs(blob, "image_output.png");
+    });
+  };
+  // -----------------------
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,13 +173,37 @@ export default function ChatBot() {
           {messages.map((msg, idx) => (
             <div 
               key={idx} 
+              id={`msg-${idx}`}
               className={`${styles.messageWrapper} ${msg.role === "user" ? styles.userWrapper : styles.botWrapper}`}
             >
               <div className={`${styles.avatar} ${msg.role === "user" ? styles.userAvatar : styles.botAvatar}`}>
                 {msg.role === "user" ? <FaUser size={16} /> : <BsStars size={18} />}
               </div>
-              <div className={`${styles.messageBubble} ${msg.role === "user" ? styles.userMessage : styles.botMessage}`}>
-                 {msg.content}
+              
+              <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '100%' }}>
+                <div className={`${styles.messageBubble} ${msg.role === "user" ? styles.userMessage : styles.botMessage}`}>
+                   {msg.content}
+                </div>
+                
+                {/* Export Toolkit Bar */}
+                {msg.role === "bot" && (
+                  <div className={styles.exportBar} data-html2canvas-ignore="true">
+                    <button className={styles.exportBtn} onClick={() => exportPDF(idx)} title="Download PDF">
+                      <FaFilePdf size={14} /> PDF
+                    </button>
+                    <button className={styles.exportBtn} onClick={() => exportWord(msg.content)} title="Download Word Doc">
+                      <FaFileWord size={14} /> Word
+                    </button>
+                    {msg.content.includes('|') && msg.content.includes('---') && (
+                      <button className={styles.exportBtn} onClick={() => exportExcel(msg.content)} title="Download Excel Sheet">
+                        <FaFileExcel size={14} /> Excel
+                      </button>
+                    )}
+                    <button className={styles.exportBtn} onClick={() => exportPNG(idx)} title="Download as PNG Image">
+                      <FaFileImage size={14} /> PNG
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

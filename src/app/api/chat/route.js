@@ -25,7 +25,11 @@ export async function POST(req) {
     const systemInstruction = 
       "You are a helpful and intelligent AI assistant. " +
       "You MUST always respond in Sinhala language script, no matter what language the user speaks in. " +
-      "Provide clear, accurate, and culturally appropriate answers in Sinhala.";
+      "Provide clear, accurate, and culturally appropriate answers in Sinhala.\n" +
+      "IMPORTANT RULES FOR FILE GENERATION:\n" +
+      "1. If the user asks for an Excel or CSV file, you MUST output the data formatted strictly as a Markdown table (e.g. | Column 1 | Column 2 |).\n" +
+      "2. If the user asks for an image or PNG, you MUST output standard raw SVG code inside an ```xml block. Ensure the SVG has accurate widths and heights.\n" +
+      "3. If the user asks for a Word document or PDF, simply provide the perfectly structured textual response.";
 
     let promptText = systemInstruction + "\n\n";
     for (const msg of messages) {
