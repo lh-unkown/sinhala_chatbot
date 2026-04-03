@@ -170,43 +170,59 @@ export default function ChatBot() {
 
         {/* Messages */}
         <div className={styles.messagesArea}>
-          {messages.map((msg, idx) => (
-            <div 
-              key={idx} 
-              id={`msg-${idx}`}
-              className={`${styles.messageWrapper} ${msg.role === "user" ? styles.userWrapper : styles.botWrapper}`}
-            >
-              <div className={`${styles.avatar} ${msg.role === "user" ? styles.userAvatar : styles.botAvatar}`}>
-                {msg.role === "user" ? <FaUser size={16} /> : <BsStars size={18} />}
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '100%' }}>
-                <div className={`${styles.messageBubble} ${msg.role === "user" ? styles.userMessage : styles.botMessage}`}>
-                   {msg.content}
+          {messages.map((msg, idx) => {
+            let content = msg.content;
+            let fileType = null;
+            
+            if (msg.role === "bot") {
+              const match = content.match(/___FILE:([A-Z]+)___/);
+              if (match) {
+                fileType = match[1];
+                content = content.replace(match[0], '').trim();
+              }
+            }
+
+            return (
+              <div 
+                key={idx} 
+                id={`msg-${idx}`}
+                className={`${styles.messageWrapper} ${msg.role === "user" ? styles.userWrapper : styles.botWrapper}`}
+              >
+                <div className={`${styles.avatar} ${msg.role === "user" ? styles.userAvatar : styles.botAvatar}`}>
+                  {msg.role === "user" ? <FaUser size={16} /> : <BsStars size={18} />}
                 </div>
                 
-                {/* Export Toolkit Bar */}
-                {msg.role === "bot" && (
-                  <div className={styles.exportBar} data-html2canvas-ignore="true">
-                    <button className={styles.exportBtn} onClick={() => exportPDF(idx)} title="Download PDF">
-                      <FaFilePdf size={14} /> PDF
-                    </button>
-                    <button className={styles.exportBtn} onClick={() => exportWord(msg.content)} title="Download Word Doc">
-                      <FaFileWord size={14} /> Word
-                    </button>
-                    {msg.content.includes('|') && msg.content.includes('---') && (
-                      <button className={styles.exportBtn} onClick={() => exportExcel(msg.content)} title="Download Excel Sheet">
-                        <FaFileExcel size={14} /> Excel
-                      </button>
-                    )}
-                    <button className={styles.exportBtn} onClick={() => exportPNG(idx)} title="Download as PNG Image">
-                      <FaFileImage size={14} /> PNG
-                    </button>
+                <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '100%' }}>
+                  <div className={`${styles.messageBubble} ${msg.role === "user" ? styles.userMessage : styles.botMessage}`}>
+                     {content}
                   </div>
-                )}
+                  
+                  {fileType && (
+                    <div className={styles.fileCard} data-html2canvas-ignore="true">
+                      <div className={styles.fileIconBox}>
+                         {fileType === 'PDF' && <FaFilePdf size={24} color="#f87171" />}
+                         {(fileType === 'EXCEL' || fileType === 'CSV') && <FaFileExcel size={24} color="#34d399" />}
+                         {fileType === 'WORD' && <FaFileWord size={24} color="#60a5fa" />}
+                         {fileType === 'PNG' && <FaFileImage size={24} color="#c084fc" />}
+                      </div>
+                      <div className={styles.fileInfo}>
+                         <h4>{fileType} Generated</h4>
+                         <p>Ready to download.</p>
+                      </div>
+                      <button className={styles.fileDownloadBtn} onClick={() => {
+                        if (fileType === 'PDF') exportPDF(idx);
+                        else if (fileType === 'EXCEL' || fileType === 'CSV') exportExcel(msg.content);
+                        else if (fileType === 'WORD') exportWord(msg.content);
+                        else if (fileType === 'PNG') exportPNG(idx);
+                      }}>
+                        Download
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <div ref={messagesEndRef} />
         </div>
