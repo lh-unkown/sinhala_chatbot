@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FaPaperPlane, FaRobot, FaUser } from "react-icons/fa";
+import { FaPaperPlane, FaUser } from "react-icons/fa";
+import { BsStars } from "react-icons/bs";
 import styles from "./page.module.css";
 
 export default function ChatBot() {
@@ -53,7 +54,6 @@ export default function ChatBot() {
     } catch (err) {
       console.error(err);
       setError("සමාවෙන්න, සම්බන්ධතා දෝෂයක් ඇතිවිය. කරුණාකර නැවත උත්සාහ කරන්න.");
-      // optionally remove user msg or handle better
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -69,13 +69,23 @@ export default function ChatBot() {
 
   return (
     <main className={styles.mainContainer}>
+      <div className={styles.ambientGlow} />
+      
       <div className={styles.chatWindow}>
         
-        {/* Header */}
-        <header className={styles.header}>
-          <h1 className={styles.title}>සිංහල AI Chatbot</h1>
-          <p className={styles.subtitle}>Powered by Google Gemini ⚡</p>
-        </header>
+        {/* Futuristic AI Orb Header Component */}
+        <div className={styles.aiOrbContainer}>
+          <div className={styles.orbWrapper}>
+            <div className={`${styles.orbCore} ${isLoading ? styles.orbCoreThinking : ""}`} />
+            <div className={`${styles.ring} ${styles.ring1} ${isLoading ? styles.ringThinking : ""}`} />
+            <div className={`${styles.ring} ${styles.ring2} ${isLoading ? styles.ringThinking : ""}`} />
+            <div className={`${styles.ring} ${styles.ring3} ${isLoading ? styles.ringThinking : ""}`} />
+          </div>
+          <h1 className={styles.headerText}>Sys_Core_SL</h1>
+          <p className={styles.statusText}>
+            {isLoading ? "Thinking // සිතමින්..." : "Online // සජීවී"}
+          </p>
+        </div>
 
         {/* Messages */}
         <div className={styles.messagesArea}>
@@ -84,27 +94,14 @@ export default function ChatBot() {
               key={idx} 
               className={`${styles.messageWrapper} ${msg.role === "user" ? styles.userWrapper : styles.botWrapper}`}
             >
-              <div className={`${styles.avatar} ${msg.role === "user" ? styles.userAvatar : ""}`}>
-                {msg.role === "user" ? <FaUser size={16} /> : <FaRobot size={18} />}
+              <div className={`${styles.avatar} ${msg.role === "user" ? styles.userAvatar : styles.botAvatar}`}>
+                {msg.role === "user" ? <FaUser size={16} /> : <BsStars size={18} />}
               </div>
               <div className={`${styles.messageBubble} ${msg.role === "user" ? styles.userMessage : styles.botMessage}`}>
-                {msg.content}
+                 {msg.content}
               </div>
             </div>
           ))}
-
-          {isLoading && (
-            <div className={`${styles.messageWrapper} ${styles.botWrapper}`}>
-              <div className={styles.avatar}>
-                <FaRobot size={18} />
-              </div>
-              <div className={`${styles.messageBubble} ${styles.botMessage}`}>
-                <div className={styles.loadingDot}></div>
-                <div className={styles.loadingDot}></div>
-                <div className={styles.loadingDot}></div>
-              </div>
-            </div>
-          )}
 
           <div ref={messagesEndRef} />
         </div>
@@ -131,7 +128,7 @@ export default function ChatBot() {
             className={styles.sendButton} 
             onClick={handleSend} 
             disabled={!input.trim() || isLoading}
-            title="Send"
+            title="Transmit"
           >
             <FaPaperPlane />
           </button>
