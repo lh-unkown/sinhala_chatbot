@@ -94,7 +94,7 @@ export async function POST(req) {
       }
       console.error("All models failed:", errors);
       console.error("Available models for this key:", availableModels);
-      throw new Error(`Models failed. Available to you: ${availableModels}`);
+      throw new Error(`Models failed. Actual errors: ${errors.join(" | ")}. Available models: ${availableModels}`);
     }
 
     const responseText = result.response.text();
