@@ -51,6 +51,6 @@ export async function POST(req) {
     return Response.json({ role: "bot", content: responseText });
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return Response.json({ error: "Failed to generate response" }, { status: 500 });
+    return Response.json({ error: `Backend Error: ${error.message}` }, { status: 500 });
   }
 }
